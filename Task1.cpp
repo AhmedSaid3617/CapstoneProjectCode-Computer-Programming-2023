@@ -7,7 +7,7 @@ int main(){
     char connection;
 
     // Input resistance values.
-    cout << "Circuit description: ";
+    cout << "Circuit descrption: ";
     cin >> connection >> r1 >> r2 >> r3;
     cout << "\n";
 
