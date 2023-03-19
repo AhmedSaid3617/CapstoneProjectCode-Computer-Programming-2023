@@ -3,32 +3,70 @@ using namespace std;
 
 int main(){
     // Initialize variables.
-    float r1, r2, r3, rEq, volt, current;
+    float r1 = 5, r2, r3, rEq, volt, current;
     char connection;
+    string input;
+    int breakPoint = 1;
 
-    // Input resistance values.
-    cout << "Circuit descrption: ";
-    cin >> connection >> r1 >> r2 >> r3;
-    cout << "\n";
+    //Get input.
+    cout << "Circuit description: ";
+    getline(cin, input);
+    
+    // Get connection.
+    connection = input[0];
 
-    // Input current.
-    cout << "Voltage applied: ";
-    cin >> volt;
-
-    // Calculate equivalent resistance.
-    if (connection == 'S') {
-        rEq = r1 + r2 + r3;
+    // Check connection.
+    if (connection != 'S' && connection != 'P') {
+        cout << "Wrong circuit description.";
     }
-    else if (connection == 'P') {
-        rEq = 1/((1/r1) + (1/r2) + (1/r3));
+    else {
+        // Get first resistance.
+        // This loop finds the second space character (breakpoint). First resistance is between index 1 and breakpoint.
+        for (int i=2; i < input.length(); i++){
+            if (input[i] == ' ') {
+                rEq = stof(input.substr(1, i-1));
+                breakPoint = i;
+                break;
+            }
+        }
+
+
+        // Calculate equivalent series resistance.
+        // Loops over input from breakpoint, resistance is between breakpoint and next space. Adds resistance to rEq.
+        if (connection == 'S'){
+            for (int i=breakPoint + 1; i < input.length(); i++){
+                if (input[i] == ' ') {
+                    // Resistance is between breakpoint and space.
+                    r1 = stof(input.substr(breakPoint, i-breakPoint));
+
+                    // Add resistance to rEq.
+                    rEq += r1;
+
+                    // Set breakpoint to new space character index.
+                    breakPoint = i;
+                }
+            }
+        }
+
+        else {
+            for (int i=breakPoint + 1; i < input.length(); i++){
+                if (input[i] == ' ') {
+                    r1 = stof(input.substr(breakPoint, i-breakPoint));
+
+                    // Calculates rEq parallel with new resistance.
+                    rEq = 1/(1/rEq + 1/r1);
+
+                    breakPoint = i;
+                }
+            }
+        }
+
+        // Get voltage and output current.
+        cout << "Voltage applied: ";
+        cin >> volt;
+        current = volt/rEq;
+        cout << "Current: " << current;
     }
-
-    // Calculate current.
-    current = volt/rEq;
-
-    // Output results.
-    cout << "Equivalent Resistance: " << rEq << endl;
-    cout << "Current: " << current << endl;
 
     return 0;
 }

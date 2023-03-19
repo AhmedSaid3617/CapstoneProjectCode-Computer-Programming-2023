@@ -2,5 +2,10 @@
 using namespace std;
 int main()
 {
-    return 0;
+    string x = "g g g g";
+    for (int i = 0; i < x.length(); i++){
+        if (x[i] == ' '){
+            cout << i;
+        }
+    }
 }
