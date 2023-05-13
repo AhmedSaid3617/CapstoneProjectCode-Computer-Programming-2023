@@ -1,6 +1,39 @@
 #include <iostream>
 using namespace std;
 
+
+// Takes a string as input and returns 1 if it's invalid. 0 if it is valid.
+int error(string circuit){
+    char allowed[] = {'S', 'P', '.', ' ', 'e', 'E'};
+    int flag;
+    // If first letter is neither S nor P, or final letter is not E return error.
+    if (circuit[0] != 'S' && circuit[0] != 'P' || circuit[circuit.length()-1] != 'E'){
+        return 1;
+    }
+    for (int i = 0; i < circuit.length(); i++){
+        flag = 1;
+        // If char is a number, then no error, sets flag to 0 and continue to next char.
+        if (circuit[i] >= 48 && circuit[i] <= 57){
+            flag = 0;
+            continue;
+        }
+        // Else char is not a number
+        // Checks if char is one of the allowed characters.
+        // If so,sets flag to 0 and breaks out of the inner loop
+        for (int j = 0; j < sizeof(allowed); j++){
+            if (circuit[i] == allowed[j]){
+                flag = 0;
+                break;
+            }
+        }
+        // If after all checks, flag is still 1 then this is an invalid character, return 1.
+        if (flag){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int main(){
     // Initialize variables.
     float newR, rEq, volt, current;
@@ -8,13 +41,15 @@ int main(){
     string circuit;
     int breakPoint = 1;
 
+    cout << error("P S 8.2 3.1 e S 1.3 7.8 e E");
+
     //Get circuit.
-    cout << "Circuit description: ";
-    getline(cin, circuit);
+    //cout << "Circuit description: ";
+    //getline(cin, circuit);
 
     // Get voltage.
-    cout << "Voltage applied: ";
-    cin >> volt;
+    //cout << "Voltage applied: ";
+    //cin >> volt;
     
     // Get connection.
     connection = circuit[0];
