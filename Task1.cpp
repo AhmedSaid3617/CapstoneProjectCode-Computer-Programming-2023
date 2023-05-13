@@ -1,19 +1,21 @@
 #include <iostream>
+#include <vector>
+#include <string.h>
 using namespace std;
 
 
-// Takes a string as input and returns 1 if it's invalid. 0 if it is valid.
-int error(string circuit){
+// Takes circuit discription as a string as input and returns 1 if it's invalid. 0 if it is valid.
+int error(string circuitStr){
     char allowed[] = {'S', 'P', '.', ' ', 'e', 'E'};
     int flag;
     // If first letter is neither S nor P, or final letter is not E return error.
-    if (circuit[0] != 'S' && circuit[0] != 'P' || circuit[circuit.length()-1] != 'E'){
+    if (circuitStr[0] != 'S' && circuitStr[0] != 'P' || circuitStr[circuitStr.length()-1] != 'E'){
         return 1;
     }
-    for (int i = 0; i < circuit.length(); i++){
+    for (int i = 0; i < circuitStr.length(); i++){
         flag = 1;
         // If char is a number, then no error, sets flag to 0 and continue to next char.
-        if (circuit[i] >= 48 && circuit[i] <= 57){
+        if (circuitStr[i] >= 48 && circuitStr[i] <= 57){
             flag = 0;
             continue;
         }
@@ -21,7 +23,7 @@ int error(string circuit){
         // Checks if char is one of the allowed characters.
         // If so,sets flag to 0 and breaks out of the inner loop
         for (int j = 0; j < sizeof(allowed); j++){
-            if (circuit[i] == allowed[j]){
+            if (circuitStr[i] == allowed[j]){
                 flag = 0;
                 break;
             }
@@ -34,14 +36,45 @@ int error(string circuit){
     return 0;
 }
 
+// Takes circuit discription as a string as input and returns it as a tokenized vector. 
+std::vector<string> split(string circuitStr){
+    char circuitChar[circuitStr.length()];
+    vector<string> circuitVect;
+
+    // Convert circuit from string to char array.
+    for (int i = 0; i < circuitStr.length(); i++){
+        circuitChar[i] = circuitStr[i];
+    }
+
+    // Tokenize the first string.
+    char *ptr = strtok(circuitChar, " ");
+    circuitVect.push_back(ptr);
+
+    while (ptr != NULL)
+    {
+        // Tokenize the string.
+        ptr = strtok(NULL, " ,");
+        // Add the string to vector.
+        circuitVect.push_back(ptr);
+    }
+    return circuitVect;
+}
+
+
 int main(){
     // Initialize variables.
     float newR, rEq, volt, current;
     char connection;
-    string circuit;
+    string circuit = "P S 8.2 3.1 e S 1.3 7.8 e E";
     int breakPoint = 1;
+    cout << "hello" << endl;
+    vector <string> x = split(circuit);
 
-    cout << error("P S 8.2 3.1 e S 1.3 7.8 e E");
+    cout << error(circuit);
+
+    for (int i = 0; i < 10; i++){
+        cout << x[i];
+    }
 
     //Get circuit.
     //cout << "Circuit description: ";
