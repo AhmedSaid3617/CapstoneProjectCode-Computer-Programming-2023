@@ -3,6 +3,8 @@
 #include <string.h>
 using namespace std;
 
+const int INFINITY = 99999999;
+
 // Takes circuit discription as a string as input and returns 1 if it's invalid. 0 if it is valid.
 int error(string circuitStr)
 {
@@ -64,6 +66,11 @@ std::vector<string> split(string circuitStr)
     return circuitVect;
 }
 
+float simpleParallel(float x, float y)
+{
+    return (x * y) / (x + y);
+}
+
 float series(vector<string> wire)
 {
     float rEq = 0;
@@ -76,23 +83,25 @@ float series(vector<string> wire)
             // Find the e that ends this new wire.
             for (int j = i + 1; j < size(wire); j++)
             {
-                if (wire[j] == "e" || wire[j] == "E"){
+                if (wire[j] == "e" || wire[j] == "E")
+                {
                     nextE = j;
                     break;
                 }
             }
 
+            // Create newWire.
             for (int j = i + 1; j <= nextE; j++)
             {
                 newWire.push_back(wire[j]);
             }
-
+            // set i to the nextE to continue after it.
             i = nextE;
 
             rEq += series(newWire);
 
+            // Clear newWire for next loops.
             newWire.clear();
-
         }
         else if (wire[i] == "P")
         {
@@ -109,21 +118,172 @@ float series(vector<string> wire)
     }
 }
 
+float parallel(vector<string> wire)
+{
+    float rEq = INFINITY;
+    int nextE;
+    vector<string> newWire;
+    for (int i = 0; i < size(wire); i++)
+    {
+        if (wire[i] == "S")
+        {
+            // Find the e that ends this new wire.
+            for (int j = i + 1; j < size(wire); j++)
+            {
+                if (wire[j] == "e" || wire[j] == "E")
+                {
+                    nextE = j;
+                    break;
+                }
+            }
+
+            // Create newWire.
+            for (int j = i + 1; j <= nextE; j++)
+            {
+                newWire.push_back(wire[j]);
+            }
+            // set i to the nextE to continue after it.
+            i = nextE;
+
+            rEq = simpleParallel(rEq, series(newWire));
+
+            // Clear newWire for next loops.
+            newWire.clear();
+        }
+
+        else if (wire[i] == "P")
+        {
+            // Find the e that ends this new wire.
+            for (int j = i + 1; j < size(wire); j++)
+            {
+                if (wire[j] == "e" || wire[j] == "E")
+                {
+                    nextE = j;
+                    break;
+                }
+            }
+
+            // Create newWire.
+            for (int j = i + 1; j <= nextE; j++)
+            {
+                newWire.push_back(wire[j]);
+            }
+            // set i to the nextE to continue after it.
+            i = nextE;
+
+            rEq = simpleParallel(rEq, parallel(newWire));
+
+            // Clear newWire for next loops.
+            newWire.clear();
+        }
+        else if (wire[i] == "e" || wire[i] == "E")
+        {
+            return rEq;
+        }
+        else
+        {
+            rEq = simpleParallel(rEq, stof(wire[i]));
+        }
+    }
+}
+
+
+float evaluate(vector<string> wire, char connection){
+    float rEq = (connection == 'S')? 0: INFINITY;
+    int nextE;
+    vector<string> newWire;
+    for (int i = 0; i < size(wire); i++)
+    {
+        if (wire[i] == "S" || (wire[i] == "P"))
+        {
+            // Find the e that ends this new wire.
+            for (int j = i + 1; j < size(wire); j++)
+            {
+                if (wire[j] == "e" || wire[j] == "E")
+                {
+                    nextE = j;
+                    break;
+                }
+            }
+
+            // Create newWire.
+            for (int j = i + 1; j <= nextE; j++)
+            {
+                newWire.push_back(wire[j]);
+            }
+            // set i to the nextE to continue after it.
+
+            //rEq += series(newWire);
+            
+            if (connection == 'S') rEq += evaluate(newWire, wire[i][0]);
+            else if(connection == 'P') rEq = simpleParallel(rEq, evaluate(newWire, wire[i][0]));
+
+            i = nextE;
+
+            // Clear newWire for next loops.
+            newWire.clear();
+        }
+        /*else if (wire[i] == "P")
+        {
+            // Find the e that ends this new wire.
+            for (int j = i + 1; j < size(wire); j++)
+            {
+                if (wire[j] == "e" || wire[j] == "E")
+                {
+                    nextE = j;
+                    break;
+                }
+            }
+
+            // Create newWire.
+            for (int j = i + 1; j <= nextE; j++)
+            {
+                newWire.push_back(wire[j]);
+            }
+            // set i to the nextE to continue after it.
+            i = nextE;
+
+            //rEq += series(newWire);
+            if (connection == 's') rEq += evaluate(newWire, 'S');
+            else if(connection == 'P') rEq = simpleParallel(rEq, evaluate(newWire, 'P'));
+
+            // Clear newWire for next loops.
+            newWire.clear();
+        }*/
+        else if (wire[i] == "e" || wire[i] == "E")
+        {
+            return rEq;
+        }
+        else
+        {
+            if (connection == 'S') rEq += stof(wire[i]);
+            else if(connection == 'P') rEq = simpleParallel(rEq, stof(wire[i]));
+            
+        }
+    }
+}
+
+
 int main()
 {
-    string circuit = "S 1 S 2 3 e S 1 1 e 2 E";
+    string circuit = "P 1 S 2 3 e P 1 1 e 2 E";
 
     vector<string> circuitVect = split(circuit);
 
-    //cout << series(circuitVect);
+    // cout << series(circuitVect);
 
     vector<string> circuitVectNo1let;
+    for (int i = 1; i < size(circuitVect); i++){
+        circuitVectNo1let.push_back(circuitVect[i]);
+    }
 
-    if (circuitVect[0] == "S"){
-        for (int i = 1; i < size(circuitVect); i++){
-            circuitVectNo1let.push_back(circuitVect[i]);
-        }
-        cout << series(circuitVectNo1let);
+    if (circuitVect[0] == "S")
+    {
+        cout << evaluate(circuitVectNo1let, 'S');
+    }
+    else
+    {
+        cout << evaluate(circuitVectNo1let, 'P');
     }
 
     // cout << series(circuitVect);
