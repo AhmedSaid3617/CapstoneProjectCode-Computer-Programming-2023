@@ -64,35 +64,35 @@ std::vector<string> split(string circuitStr)
     return circuitVect;
 }
 
-float evaluate(vector<string> wire)
+float series(vector<string> wire)
 {
-    float rEq;
+    float rEq = 0;
+    int nextE;
     vector<string> newWire;
     for (int i = 0; i < size(wire); i++)
     {
-        rEq;
         if (wire[i] == "S")
         {
-            rEq = 0;
-
+            // Find the e that ends this new wire.
             for (int j = i + 1; j < size(wire); j++)
+            {
+                if (wire[j] == "e" || wire[j] == "E"){
+                    nextE = j;
+                    break;
+                }
+            }
+
+            for (int j = i + 1; j <= nextE; j++)
             {
                 newWire.push_back(wire[j]);
             }
-            rEq += evaluate(newWire);
 
-            for (int j = i; j < size(wire); j++)
-            {
-                if (wire[j] == "e")
-                {
-                    i = j;
-                    break;
-                }
-                else if (wire[j] == "E")
-                {
-                    return rEq;
-                }
-            }
+            i = nextE;
+
+            rEq += series(newWire);
+
+            newWire.clear();
+
         }
         else if (wire[i] == "P")
         {
@@ -111,20 +111,20 @@ float evaluate(vector<string> wire)
 
 int main()
 {
-    string circuit = "S 1 S 2 3 e 2 E";
+    string circuit = "S 1 S 2 3 e S 1 1 e 2 E";
 
     vector<string> circuitVect = split(circuit);
 
-    cout << evaluate(circuitVect);
+    //cout << series(circuitVect);
 
-    // vector<string> circuitVectNo1let;
+    vector<string> circuitVectNo1let;
 
-    /*if (circuitVect[0] == "S "){
+    if (circuitVect[0] == "S"){
         for (int i = 1; i < size(circuitVect); i++){
             circuitVectNo1let.push_back(circuitVect[i]);
         }
-        cout << evaluate(circuitVectNo1let);
-    }*/
+        cout << series(circuitVectNo1let);
+    }
 
     // cout << series(circuitVect);
 
