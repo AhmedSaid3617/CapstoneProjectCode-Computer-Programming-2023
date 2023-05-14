@@ -47,23 +47,19 @@ std::vector<string> split(string circuitStr)
 {
 
     vector<string> circuitVect;
-    // Add first letter(S or P).
     circuitVect.push_back(circuitStr.substr(0, 1));
-    int breakPoint = 1;
-
-    // Add each letter or number.
-    for (int i = 0; i < circuitStr.length(); i++)
+    int breakPoint = 2;
+    for (int i = 2; i < circuitStr.length(); i++)
     {
         if (circuitStr[i] == ' ')
         {
             circuitVect.push_back(circuitStr.substr(breakPoint, i - breakPoint));
             breakPoint = i + 1;
         }
-
     }
-
-    // Add E.
     circuitVect.push_back("E");
+
+    circuitVect.push_back(circuitStr.substr(breakPoint + 1, circuitStr.length() - 1));
 
     return circuitVect;
 }
@@ -78,16 +74,25 @@ float evaluate(vector<string> wire)
         if (wire[i] == "S")
         {
             rEq = 0;
+
             for (int j = i + 1; j < size(wire); j++)
             {
                 newWire.push_back(wire[j]);
             }
             rEq += evaluate(newWire);
 
-            for (int j = i; j < size(wire); j++){
-                if (wire[j] == "e") i = j;
+            for (int j = i; j < size(wire); j++)
+            {
+                if (wire[j] == "e")
+                {
+                    i = j;
+                    break;
+                }
+                else if (wire[j] == "E")
+                {
+                    return rEq;
+                }
             }
-
         }
         else if (wire[i] == "P")
         {
@@ -106,35 +111,28 @@ float evaluate(vector<string> wire)
 
 int main()
 {
-    string circuit = "S 1 2 3 2 E";
+    string circuit = "S 1 S 2 3 e 2 E";
 
     vector<string> circuitVect = split(circuit);
 
     cout << evaluate(circuitVect);
 
-    vector<string> circuitVectNo1let;
+    // vector<string> circuitVectNo1let;
 
-    if (circuitVect[0] == "S "){
+    /*if (circuitVect[0] == "S "){
         for (int i = 1; i < size(circuitVect); i++){
             circuitVectNo1let.push_back(circuitVect[i]);
         }
         cout << evaluate(circuitVectNo1let);
-    }
+    }*/
 
-
-
-    //cout << series(circuitVect);
-
-
+    // cout << series(circuitVect);
 
     // Initialize variables.
     float newR, rEq, volt, current;
     char connection;
-    
-    int breakPoint = 1;
-    
 
-    cout << error(circuit);
+    int breakPoint = 1;
 
     // Check connection.
     if (connection != 'S' && connection != 'P')
