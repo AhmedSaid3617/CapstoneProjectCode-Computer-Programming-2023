@@ -47,50 +47,98 @@ std::vector<string> split(string circuitStr)
 {
 
     vector<string> circuitVect;
-    int breakPoint = -1;
+    // Add first letter(S or P).
+    circuitVect.push_back(circuitStr.substr(0, 1));
+    int breakPoint = 1;
+
+    // Add each letter or number.
     for (int i = 0; i < circuitStr.length(); i++)
     {
         if (circuitStr[i] == ' ')
         {
-            circuitVect.push_back(circuitStr.substr(breakPoint + 1, i - breakPoint));
-            breakPoint = i;
+            circuitVect.push_back(circuitStr.substr(breakPoint, i - breakPoint));
+            breakPoint = i + 1;
         }
+
     }
+
+    // Add E.
+    circuitVect.push_back("E");
 
     return circuitVect;
 }
 
+float evaluate(vector<string> wire)
+{
+    float rEq;
+    vector<string> newWire;
+    for (int i = 0; i < size(wire); i++)
+    {
+        rEq;
+        if (wire[i] == "S")
+        {
+            rEq = 0;
+            for (int j = i + 1; j < size(wire); j++)
+            {
+                newWire.push_back(wire[j]);
+            }
+            rEq += evaluate(newWire);
+
+            for (int j = i; j < size(wire); j++){
+                if (wire[j] == "e") i = j;
+            }
+
+        }
+        else if (wire[i] == "P")
+        {
+            /* code */
+        }
+        else if (wire[i] == "e" || wire[i] == "E")
+        {
+            return rEq;
+        }
+        else
+        {
+            rEq += stof(wire[i]);
+        }
+    }
+}
+
 int main()
 {
+    string circuit = "S 1 2 3 2 E";
+
+    vector<string> circuitVect = split(circuit);
+
+    cout << evaluate(circuitVect);
+
+    vector<string> circuitVectNo1let;
+
+    if (circuitVect[0] == "S "){
+        for (int i = 1; i < size(circuitVect); i++){
+            circuitVectNo1let.push_back(circuitVect[i]);
+        }
+        cout << evaluate(circuitVectNo1let);
+    }
+
+
+
+    //cout << series(circuitVect);
+
+
+
     // Initialize variables.
     float newR, rEq, volt, current;
     char connection;
-    string circuit = "PS 8.2 3.1 e S 1.3 7.8 e E";
+    
     int breakPoint = 1;
-    vector<string> x = split(circuit);
+    
 
     cout << error(circuit);
-
-    for (int i = 0; i < 10; i++)
-    {
-        cout << x[i] << endl;
-    }
-
-    // Get circuit.
-    // cout << "Circuit description: ";
-    // getline(cin, circuit);
-
-    // Get voltage.
-    // cout << "Voltage applied: ";
-    // cin >> volt;
-
-    // Get connection.
-    connection = circuit[0];
 
     // Check connection.
     if (connection != 'S' && connection != 'P')
     {
-        cout << "Wrong circuit description.";
     }
     else
     {
