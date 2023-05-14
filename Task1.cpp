@@ -49,8 +49,11 @@ std::vector<string> split(string circuitStr)
 {
 
     vector<string> circuitVect;
+    // Add first letter.
     circuitVect.push_back(circuitStr.substr(0, 1));
     int breakPoint = 2;
+
+    // Loop over string and add all tokens separated by space.
     for (int i = 2; i < circuitStr.length(); i++)
     {
         if (circuitStr[i] == ' ')
@@ -59,141 +62,35 @@ std::vector<string> split(string circuitStr)
             breakPoint = i + 1;
         }
     }
-    circuitVect.push_back("E");
 
-    circuitVect.push_back(circuitStr.substr(breakPoint + 1, circuitStr.length() - 1));
+    // Add final letter.
+    circuitVect.push_back("E");
 
     return circuitVect;
 }
 
+
+// Takes two floats and returns their parallel equivalent.
 float simpleParallel(float x, float y)
 {
     return (x * y) / (x + y);
 }
 
-float series(vector<string> wire)
-{
-    float rEq = 0;
-    int nextE;
-    vector<string> newWire;
-    for (int i = 0; i < size(wire); i++)
-    {
-        if (wire[i] == "S")
-        {
-            // Find the e that ends this new wire.
-            for (int j = i + 1; j < size(wire); j++)
-            {
-                if (wire[j] == "e" || wire[j] == "E")
-                {
-                    nextE = j;
-                    break;
-                }
-            }
 
-            // Create newWire.
-            for (int j = i + 1; j <= nextE; j++)
-            {
-                newWire.push_back(wire[j]);
-            }
-            // set i to the nextE to continue after it.
-            i = nextE;
-
-            rEq += series(newWire);
-
-            // Clear newWire for next loops.
-            newWire.clear();
-        }
-        else if (wire[i] == "P")
-        {
-            /* code */
-        }
-        else if (wire[i] == "e" || wire[i] == "E")
-        {
-            return rEq;
-        }
-        else
-        {
-            rEq += stof(wire[i]);
-        }
-    }
-}
-
-float parallel(vector<string> wire)
-{
-    float rEq = INFINITY;
-    int nextE;
-    vector<string> newWire;
-    for (int i = 0; i < size(wire); i++)
-    {
-        if (wire[i] == "S")
-        {
-            // Find the e that ends this new wire.
-            for (int j = i + 1; j < size(wire); j++)
-            {
-                if (wire[j] == "e" || wire[j] == "E")
-                {
-                    nextE = j;
-                    break;
-                }
-            }
-
-            // Create newWire.
-            for (int j = i + 1; j <= nextE; j++)
-            {
-                newWire.push_back(wire[j]);
-            }
-            // set i to the nextE to continue after it.
-            i = nextE;
-
-            rEq = simpleParallel(rEq, series(newWire));
-
-            // Clear newWire for next loops.
-            newWire.clear();
-        }
-
-        else if (wire[i] == "P")
-        {
-            // Find the e that ends this new wire.
-            for (int j = i + 1; j < size(wire); j++)
-            {
-                if (wire[j] == "e" || wire[j] == "E")
-                {
-                    nextE = j;
-                    break;
-                }
-            }
-
-            // Create newWire.
-            for (int j = i + 1; j <= nextE; j++)
-            {
-                newWire.push_back(wire[j]);
-            }
-            // set i to the nextE to continue after it.
-            i = nextE;
-
-            rEq = simpleParallel(rEq, parallel(newWire));
-
-            // Clear newWire for next loops.
-            newWire.clear();
-        }
-        else if (wire[i] == "e" || wire[i] == "E")
-        {
-            return rEq;
-        }
-        else
-        {
-            rEq = simpleParallel(rEq, stof(wire[i]));
-        }
-    }
-}
-
+// Takes circuit description as string vector and returns equivalent resistance.
 float evaluate(vector<string> wire, char connection)
 {
+    // Set equivalent resistance to zero in case of series connection and infinity in
+    // case of parallel connection.
     float rEq = (connection == 'S') ? 0 : INFINITY;
+
     int nextE;
     vector<string> newWire;
+
+    // Loop over each item in the wire.
     for (int i = 0; i < size(wire); i++)
     {
+        // If item is S or P then there is a new wire.
         if (wire[i] == "S" || (wire[i] == "P"))
         {
             // Find the e that ends this new wire.
@@ -206,20 +103,23 @@ float evaluate(vector<string> wire, char connection)
                 }
             }
 
-            // Create newWire.
+            // Create newWire from after S or P to the first e.
             for (int j = i + 1; j <= nextE; j++)
             {
                 newWire.push_back(wire[j]);
             }
-            // set i to the nextE to continue after it.
-
-            // rEq += series(newWire);
-
+            
+            // Use recursion.
+            // evaluate the value of the new wire according to its type.
+            // Add it to rEq if this is a series connection.
+            // Parallel it to rEq if this is a parallel connection.
+            // 
             if (connection == 'S')
                 rEq += evaluate(newWire, wire[i][0]);
             else if (connection == 'P')
                 rEq = simpleParallel(rEq, evaluate(newWire, wire[i][0]));
 
+            // Set i to the nextE to continue after it.
             i = nextE;
 
             // Clear newWire for next loops.
@@ -230,6 +130,8 @@ float evaluate(vector<string> wire, char connection)
         {
             return rEq;
         }
+
+        // Calculates new rEq if it's a number.
         else
         {
             if (connection == 'S')
@@ -238,14 +140,20 @@ float evaluate(vector<string> wire, char connection)
                 rEq = simpleParallel(rEq, stof(wire[i]));
         }
     }
+
     return 0;
 }
 
+
+
 int main()
 {
+    // Get circuit description.
     string circuit;
     cout << "Enter circuit description: ";
     getline(cin, circuit);
+
+    // Check for error.
     if (error(circuit))
     {
         cout << "Wrong circuit desciription";
@@ -255,24 +163,30 @@ int main()
         float voltage;
         float current;
         float resistance;
+
         cout << "Enter voltage: ";
         cin >> voltage;
 
+        // Turn circuit description to vector.
         vector<string> circuitVect = split(circuit);
 
+        // Create circuitVectNo1let which is the same as circuitVect
+        // without the first item.
         vector<string> circuitVectNo1let;
         for (int i = 1; i < size(circuitVect); i++)
         {
             circuitVectNo1let.push_back(circuitVect[i]);
         }
 
+        // Calculate the resistance according to the first letter
+        // of circuit.
         resistance = evaluate(circuitVectNo1let, circuit[0]);
 
-        cout << "Equivalent resistance: " << resistance << endl;
+        cout << "Equivalent resistance: " << resistance << " Ohm" << endl;
 
         current = voltage/resistance;
         
-        cout << "Current: " << current;
+        cout << "Current: " << current << " A";
     }
     return 0;
 }
