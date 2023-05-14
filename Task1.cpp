@@ -187,9 +187,9 @@ float parallel(vector<string> wire)
     }
 }
 
-
-float evaluate(vector<string> wire, char connection){
-    float rEq = (connection == 'S')? 0: INFINITY;
+float evaluate(vector<string> wire, char connection)
+{
+    float rEq = (connection == 'S') ? 0 : INFINITY;
     int nextE;
     vector<string> newWire;
     for (int i = 0; i < size(wire); i++)
@@ -213,149 +213,66 @@ float evaluate(vector<string> wire, char connection){
             }
             // set i to the nextE to continue after it.
 
-            //rEq += series(newWire);
-            
-            if (connection == 'S') rEq += evaluate(newWire, wire[i][0]);
-            else if(connection == 'P') rEq = simpleParallel(rEq, evaluate(newWire, wire[i][0]));
+            // rEq += series(newWire);
+
+            if (connection == 'S')
+                rEq += evaluate(newWire, wire[i][0]);
+            else if (connection == 'P')
+                rEq = simpleParallel(rEq, evaluate(newWire, wire[i][0]));
 
             i = nextE;
 
             // Clear newWire for next loops.
             newWire.clear();
         }
-        /*else if (wire[i] == "P")
-        {
-            // Find the e that ends this new wire.
-            for (int j = i + 1; j < size(wire); j++)
-            {
-                if (wire[j] == "e" || wire[j] == "E")
-                {
-                    nextE = j;
-                    break;
-                }
-            }
 
-            // Create newWire.
-            for (int j = i + 1; j <= nextE; j++)
-            {
-                newWire.push_back(wire[j]);
-            }
-            // set i to the nextE to continue after it.
-            i = nextE;
-
-            //rEq += series(newWire);
-            if (connection == 's') rEq += evaluate(newWire, 'S');
-            else if(connection == 'P') rEq = simpleParallel(rEq, evaluate(newWire, 'P'));
-
-            // Clear newWire for next loops.
-            newWire.clear();
-        }*/
         else if (wire[i] == "e" || wire[i] == "E")
         {
             return rEq;
         }
         else
         {
-            if (connection == 'S') rEq += stof(wire[i]);
-            else if(connection == 'P') rEq = simpleParallel(rEq, stof(wire[i]));
-            
+            if (connection == 'S')
+                rEq += stof(wire[i]);
+            else if (connection == 'P')
+                rEq = simpleParallel(rEq, stof(wire[i]));
         }
     }
+    return 0;
 }
-
 
 int main()
 {
-    string circuit = "P 1 S 2 3 e P 1 1 e 2 E";
-
-    vector<string> circuitVect = split(circuit);
-
-    // cout << series(circuitVect);
-
-    vector<string> circuitVectNo1let;
-    for (int i = 1; i < size(circuitVect); i++){
-        circuitVectNo1let.push_back(circuitVect[i]);
-    }
-
-    if (circuitVect[0] == "S")
+    string circuit;
+    cout << "Enter circuit description: ";
+    getline(cin, circuit);
+    if (error(circuit))
     {
-        cout << evaluate(circuitVectNo1let, 'S');
+        cout << "Wrong circuit desciription";
     }
     else
     {
-        cout << evaluate(circuitVectNo1let, 'P');
-    }
+        float voltage;
+        float current;
+        float resistance;
+        cout << "Enter voltage: ";
+        cin >> voltage;
 
-    // cout << series(circuitVect);
+        vector<string> circuitVect = split(circuit);
 
-    // Initialize variables.
-    float newR, rEq, volt, current;
-    char connection;
-
-    int breakPoint = 1;
-
-    // Check connection.
-    if (connection != 'S' && connection != 'P')
-    {
-    }
-    else
-    {
-        // Get first resistance.
-        // This loop finds the second space character (breakpoint).
-        // First resistance is between index 1 and breakpoint.
-        for (int i = 2; i < circuit.length(); i++)
+        vector<string> circuitVectNo1let;
+        for (int i = 1; i < size(circuitVect); i++)
         {
-            if (circuit[i] == ' ')
-            {
-                rEq = stof(circuit.substr(1, i - 1));
-                breakPoint = i;
-                break;
-            }
+            circuitVectNo1let.push_back(circuitVect[i]);
         }
 
-        // Loops over input from breakpoint, resistance is between breakpoint and next space.
-        // Adds resistance to rEq.
+        resistance = evaluate(circuitVectNo1let, circuit[0]);
 
-        // Calculate equivalent series resistance.
-        if (connection == 'S')
-        {
-            for (int i = breakPoint + 1; i < circuit.length(); i++)
-            {
-                if (circuit[i] == ' ')
-                {
-                    // Resistance is between breakpoint and space.
-                    newR = stof(circuit.substr(breakPoint, i - breakPoint));
+        cout << "Equivalent resistance: " << resistance << endl;
 
-                    // Add resistance to rEq.
-                    rEq += newR;
-
-                    // Set breakpoint to new space character index.
-                    breakPoint = i;
-                }
-            }
-        }
-
-        // Calculate equivalent parallel resistance.
-        else
-        {
-            for (int i = breakPoint + 1; i < circuit.length(); i++)
-            {
-                if (circuit[i] == ' ')
-                {
-                    newR = stof(circuit.substr(breakPoint, i - breakPoint));
-
-                    // Calculates rEq parallel with new resistance.
-                    rEq = 1 / (1 / rEq + 1 / newR);
-
-                    breakPoint = i;
-                }
-            }
-        }
-
-        // Calculate and output current.
-        current = volt / rEq;
+        current = voltage/resistance;
+        
         cout << "Current: " << current;
     }
-
     return 0;
 }
